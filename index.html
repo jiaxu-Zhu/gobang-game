@@ -180,32 +180,22 @@
             color: #888;
             font-size: 0.95em;
         }
-        
-        .footer {
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-        }
-        
         .version-btn {
-            background: rgba(255,255,255,0.25);
-            border: 1px solid rgba(255,255,255,0.5);
-            color: #333;
+            background: rgba(102, 126, 234, 0.25);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            color: #667eea;
             padding: 8px 16px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 0.9em;
             transition: all 0.2s ease;
-            backdrop-filter: blur(5px);
         }
-        
+
         .version-btn:hover {
-            background: rgba(255,255,255,0.35);
+            background: rgba(102, 126, 234, 0.35);
             transform: scale(1.05);
         }
-        
+
         .modal {
             display: none;
             position: fixed;
@@ -218,11 +208,11 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .modal.show {
             display: flex;
         }
-        
+
         .modal-content {
             background: white;
             padding: 30px;
@@ -231,24 +221,24 @@
             width: 90%;
             text-align: center;
         }
-        
+
         .modal-content h2 {
             color: #333;
             margin-bottom: 15px;
         }
-        
+
         .modal-content p {
             color: #666;
             margin: 8px 0;
         }
-        
+
         .modal-content ul {
             text-align: left;
             margin-left: 20px;
             line-height: 1.8;
             color: #555;
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -259,73 +249,9 @@
             font-size: 1em;
             margin-top: 15px;
         }
-        
+
         .btn-primary:hover {
             opacity: 0.9;
-        }
-        
-        /* 移动端适配 */
-        @media (max-width: 500px) {
-            body {
-                padding: 10px;
-                align-items: flex-start;
-            }
-            
-            .game-container {
-                padding: 15px;
-                border-radius: 15px;
-            }
-            
-            h1 {
-                font-size: 1.8em;
-                margin-bottom: 15px;
-            }
-            
-            .status {
-                font-size: 1em;
-                margin-bottom: 15px;
-                padding: 8px;
-            }
-            
-            #board {
-                grid-template-columns: repeat(15, 20px);
-                grid-template-rows: repeat(15, 20px);
-                padding: 10px;
-            }
-            
-            .cell {
-                width: 20px;
-                height: 20px;
-            }
-            
-            .stone {
-                width: 18px;
-                height: 18px;
-            }
-            
-            .controls {
-                margin-top: 15px;
-            }
-            
-            button {
-                padding: 10px 20px;
-                font-size: 0.95em;
-                margin: 0 5px;
-            }
-            
-            .info {
-                margin-top: 15px;
-                font-size: 0.85em;
-            }
-            
-            .footer {
-                bottom: 5px;
-            }
-            
-            .version-btn {
-                padding: 6px 12px;
-                font-size: 0.8em;
-            }
         }
     </style>
 </head>
@@ -338,28 +264,10 @@
         <div class="controls">
             <button id="restart">重新开始</button>
             <button id="undo">悔棋</button>
+            <button class="version-btn" onclick="showVersion()">📋 版本信息</button>
         </div>
         <div class="info">
             点击棋盘交叉点落子，五子连珠即获胜
-        </div>
-    </div>
-    
-    <div class="footer">
-        <button class="version-btn" onclick="showVersion()">📋 版本信息</button>
-    </div>
-    
-    <div class="modal" id="versionModal">
-        <div class="modal-content">
-            <h2>📋 版本信息</h2>
-            <p><strong>当前版本:</strong> v1.1.1</p>
-            <p><strong>更新时间:</strong> 2026-02-27</p>
-            <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
-            <p><strong>更新内容:</strong></p>
-            <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
-                <li>添加版本查看功能</li>
-                <li>优化手机端显示，修复显示不全问题</li>
-            </ul>
-            <button class="btn-primary" onclick="hideVersion()">确定</button>
         </div>
     </div>
 
@@ -370,6 +278,67 @@
         let gameOver = false;
         let moveHistory = [];
         let moveCount = 0;
+
+        // 音效系统
+        let audioCtx = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playWinSound() {
+            if (!audioCtx) return;
+            
+            // 播放胜利的旋律（三个音符）
+            const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 - 大三和弦
+            const duration = 0.4;
+            
+            notes.forEach((freq, index) => {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.15);
+                
+                // 音量包络
+                gainNode.gain.setValueAtTime(0, audioCtx.currentTime + index * 0.15);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + index * 0.15 + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + index * 0.15 + duration);
+                
+                oscillator.start(audioCtx.currentTime + index * 0.15);
+                oscillator.stop(audioCtx.currentTime + index * 0.15 + duration);
+            });
+        }
+        
+        function playDrawSound() {
+            if (!audioCtx) return;
+            
+            // 平局音效（两个低沉的音符）
+            const notes = [261.63, 196.00]; // C4, G3
+            
+            notes.forEach((freq, index) => {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.3);
+                
+                gainNode.gain.setValueAtTime(0, audioCtx.currentTime + index * 0.3);
+                gainNode.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + index * 0.3 + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + index * 0.3 + 0.6);
+                
+                oscillator.start(audioCtx.currentTime + index * 0.3);
+                oscillator.stop(audioCtx.currentTime + index * 0.3 + 0.6);
+            });
+        }
 
         const boardElement = document.getElementById('board');
         const statusElement = document.getElementById('status');
@@ -412,9 +381,17 @@
                 statusElement.textContent = `${currentPlayer === 'black' ? '黑棋' : '白棋'}获胜！`;
                 statusElement.classList.add('winner');
                 highlightWinningStones(row, col, currentPlayer);
+                
+                // 初始化音频并播放胜利音效
+                initAudio();
+                playWinSound();
             } else if (moveCount === BOARD_SIZE * BOARD_SIZE) {
                 gameOver = true;
                 statusElement.textContent = '平局！';
+                
+                // 初始化音频并播放平局音效
+                initAudio();
+                playDrawSound();
             } else {
                 currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
                 statusElement.textContent = `${currentPlayer === 'black' ? '黑棋' : '白棋'}回合`;
@@ -567,15 +544,29 @@
 
         // 初始化
         initBoard();
-        
         // 版本信息
         function showVersion() {
-            document.getElementById('versionModal').classList.add('show');
+            document.getElementById("versionModal").classList.add("show");
         }
         
         function hideVersion() {
-            document.getElementById('versionModal').classList.remove('show');
+            document.getElementById("versionModal").classList.remove("show");
         }
     </script>
+    <div class="modal" id="versionModal">
+        <div class="modal-content">
+            <h2>📋 版本信息</h2>
+            <p><strong>当前版本:</strong> v1.2.0</p>
+            <p><strong>更新时间:</strong> 2026-02-27</p>
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
+            <p><strong>更新内容:</strong></p>
+            <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
+                <li>新增胜利音效（大三和弦旋律）</li>
+                <li>新增平局音效（低沉音符）</li>
+                <li>优化移动端显示效果</li>
+            </ul>
+            <button class="btn-primary" onclick="hideVersion()">确定</button>
+        </div>
+    </div>
 </body>
 </html>

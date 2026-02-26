@@ -180,6 +180,79 @@
             color: #888;
             font-size: 0.95em;
         }
+        .version-btn {
+            background: rgba(102, 126, 234, 0.25);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+
+        .version-btn:hover {
+            background: rgba(102, 126, 234, 0.35);
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin: 8px 0;
+        }
+
+        .modal-content ul {
+            text-align: left;
+            margin-left: 20px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -191,6 +264,7 @@
         <div class="controls">
             <button id="restart">重新开始</button>
             <button id="undo">悔棋</button>
+            <button class="version-btn" onclick="showVersion()">📋 版本信息</button>
         </div>
         <div class="info">
             点击棋盘交叉点落子，五子连珠即获胜
@@ -470,6 +544,29 @@
 
         // 初始化
         initBoard();
+        // 版本信息
+        function showVersion() {
+            document.getElementById("versionModal").classList.add("show");
+        }
+        
+        function hideVersion() {
+            document.getElementById("versionModal").classList.remove("show");
+        }
     </script>
+    <div class="modal" id="versionModal">
+        <div class="modal-content">
+            <h2>📋 版本信息</h2>
+            <p><strong>当前版本:</strong> v1.2.0</p>
+            <p><strong>更新时间:</strong> 2026-02-27</p>
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
+            <p><strong>更新内容:</strong></p>
+            <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
+                <li>新增胜利音效（大三和弦旋律）</li>
+                <li>新增平局音效（低沉音符）</li>
+                <li>优化移动端显示效果</li>
+            </ul>
+            <button class="btn-primary" onclick="hideVersion()">确定</button>
+        </div>
+    </div>
 </body>
 </html>
