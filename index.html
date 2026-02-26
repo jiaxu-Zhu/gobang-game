@@ -2,46 +2,52 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>五子棋游戏</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
+            overflow-x: hidden;
         }
 
         .game-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             text-align: center;
+            width: 100%;
+            max-width: 600px;
         }
 
         h1 {
             color: #333;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-size: clamp(1.5em, 5vw, 2.5em);
+            font-weight: bold;
         }
 
         .status {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            padding: 10px;
+            font-size: clamp(1em, 4vw, 1.3em);
+            margin-bottom: 15px;
+            padding: 12px 20px;
             border-radius: 10px;
             background: #f0f0f0;
             transition: all 0.3s;
+            font-weight: 500;
         }
 
         .status.winner {
@@ -55,24 +61,36 @@
             50% { transform: scale(1.05); }
         }
 
+        #board-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         #board {
             display: inline-grid;
-            grid-template-columns: repeat(15, 30px);
-            grid-template-rows: repeat(15, 30px);
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(15, 1fr);
             gap: 0;
             background: #DEB887;
-            padding: 15px;
+            padding: 10px;
             border-radius: 10px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
             position: relative;
+            width: min(90vw, 500px);
+            height: min(90vw, 500px);
         }
 
         .cell {
-            width: 30px;
-            height: 30px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .cell:hover {
@@ -104,14 +122,12 @@
 
         .stone {
             position: absolute;
-            width: 26px;
-            height: 26px;
+            width: 80%;
+            height: 80%;
             border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
             transition: all 0.2s ease;
+            pointer-events: none;
         }
 
         .stone.black {
@@ -128,23 +144,29 @@
         }
 
         @keyframes blink {
-            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            to { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.7; transform: scale(1.1); }
         }
 
         .controls {
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         button {
             padding: 12px 30px;
-            font-size: 1.1em;
+            font-size: clamp(1em, 4vw, 1.1em);
             border: none;
             border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 0 10px;
             font-weight: bold;
+            min-width: 120px;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         #restart {
@@ -158,6 +180,10 @@
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
         }
 
+        #restart:active {
+            transform: translateY(0);
+        }
+
         #undo {
             background: #ff9800;
             color: white;
@@ -169,16 +195,48 @@
             box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
         }
 
+        #undo:active {
+            transform: translateY(0);
+        }
+
         .info {
             margin-top: 20px;
             color: #666;
-            font-size: 0.9em;
+            font-size: clamp(0.85em, 3vw, 0.95em);
+            line-height: 1.5;
         }
 
         .move-count {
             margin-top: 10px;
             color: #888;
-            font-size: 0.95em;
+            font-size: clamp(0.9em, 3.5vw, 1em);
+            font-weight: 500;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            #board {
+                padding: 8px;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            button {
+                padding: 10px 25px;
+                min-width: 100px;
+            }
+        }
+
+        /* 防止触摸时的默认行为 */
+        .cell:active {
+            background: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
@@ -187,7 +245,9 @@
         <h1>五子棋</h1>
         <div class="status" id="status">黑棋先行</div>
         <div class="move-count" id="moveCount">已下: 0 手</div>
-        <div id="board"></div>
+        <div id="board-container">
+            <div id="board"></div>
+        </div>
         <div class="controls">
             <button id="restart">重新开始</button>
             <button id="undo">悔棋</button>
@@ -211,6 +271,12 @@
         const restartButton = document.getElementById('restart');
         const undoButton = document.getElementById('undo');
 
+        // 计算格子大小
+        function getCellSize() {
+            const boardWidth = boardElement.clientWidth;
+            return Math.floor(boardWidth / BOARD_SIZE);
+        }
+
         // 初始化棋盘
         function initBoard() {
             boardElement.innerHTML = '';
@@ -224,7 +290,18 @@
                     cell.className = 'cell';
                     cell.dataset.row = i;
                     cell.dataset.col = j;
-                    cell.addEventListener('click', () => handleCellClick(i, j));
+                    
+                    // 同时支持鼠标点击和触摸
+                    cell.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        handleCellClick(i, j);
+                    });
+                    
+                    cell.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        handleCellClick(i, j);
+                    }, { passive: false });
+                    
                     boardElement.appendChild(cell);
                 }
             }
@@ -398,6 +475,16 @@
         // 事件监听
         restartButton.addEventListener('click', restartGame);
         undoButton.addEventListener('click', undoMove);
+
+        // 防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
 
         // 初始化
         initBoard();
