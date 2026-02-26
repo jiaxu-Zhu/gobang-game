@@ -263,6 +263,70 @@
         .btn-primary:hover {
             opacity: 0.9;
         }
+        
+        /* 移动端适配 */
+        @media (max-width: 500px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+            
+            .game-container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+            
+            .status {
+                font-size: 1em;
+                margin-bottom: 15px;
+                padding: 8px;
+            }
+            
+            #board {
+                grid-template-columns: repeat(15, 20px);
+                grid-template-rows: repeat(15, 20px);
+                padding: 10px;
+            }
+            
+            .cell {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .stone {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .controls {
+                margin-top: 15px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 0.95em;
+                margin: 0 5px;
+            }
+            
+            .info {
+                margin-top: 15px;
+                font-size: 0.85em;
+            }
+            
+            .footer {
+                bottom: 5px;
+            }
+            
+            .version-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -287,12 +351,13 @@
     <div class="modal" id="versionModal">
         <div class="modal-content">
             <h2>📋 版本信息</h2>
-            <p><strong>当前版本:</strong> v1.1.0</p>
+            <p><strong>当前版本:</strong> v1.1.1</p>
             <p><strong>更新时间:</strong> 2026-02-27</p>
             <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
             <p><strong>更新内容:</strong></p>
             <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
                 <li>添加版本查看功能</li>
+                <li>优化手机端显示，修复显示不全问题</li>
             </ul>
             <button class="btn-primary" onclick="hideVersion()">确定</button>
         </div>
