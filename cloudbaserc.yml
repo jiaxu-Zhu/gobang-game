@@ -1,0 +1,31 @@
+version: 0.1
+envPath: .cloudbaserc
+functions:
+  - name: function
+    handler: index.main
+    runtime: Nodejs14.0
+    memorySize: 256
+    timeout: 3
+    triggers:
+      - name: cloudfunctiontrigger1
+        type: http
+        config: |
+          routes:
+            - path: /
+              methods:
+                - GET
+                - POST
+plugins:
+  - name: static-hosting
+    version: ^1.0.0
+staticHosting:
+  - name: gobang-game
+    src: .
+    route: /*
+    index: index.html
+    error: null
+    isCaseSensitive: false
+    autoCreate: true
+    cache:
+      - path: /*
+        ttl: 3600
